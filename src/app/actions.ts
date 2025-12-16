@@ -2,8 +2,6 @@
 "use server";
 
 import { extractTitleAndConvertImageToMarkdown } from "@/ai/flows/extract-title-and-convert-image-to-markdown";
-import { initFirebase } from "@/firebase/client";
-import { doc, setDoc } from "firebase/firestore";
 
 type ActionResult = {
   data?: { title: string; markdownContent: string };
@@ -21,18 +19,9 @@ export async function transcribeImage(
       return { error: 'AI returned an invalid response' };
     }
 
-    // Try to update firestore doc if firebase initialized
-    try {
-      const { firestore } = initFirebase();
-      const noteDocRef = doc(firestore, 'notes', noteId);
-      await setDoc(noteDocRef, {
-        status: 'completed',
-        title: result.title,
-        markdownContent: result.markdownContent,
-      }, { merge: true });
-    } catch (err) {
-      console.warn('Could not update firestore from transcribeImage', err);
-    }
+    // Server actions shouldn't initialize the browser Firebase SDK.
+    // The client will update Firestore when it has network access.
+    // If you want server-side writes, initialize and use the Admin SDK here instead.
 
     return { data: { title: result.title, markdownContent: result.markdownContent } };
   } catch (err) {

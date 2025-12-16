@@ -1,3 +1,5 @@
+"use client";
+
 import { NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { initFirebase } from "@/firebase/client";
