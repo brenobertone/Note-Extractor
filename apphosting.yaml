@@ -1,0 +1,40 @@
+# App Hosting config - provide BUILD-time public NEXT_PUBLIC_* vars so Next inlines them
+runConfig:
+  minInstances: 0
+
+# Make sure environment variables are available at BUILD time so Next can inline public vars
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyBjJx3zZvwa9r19TIvazPkA7v3rhoRWOJg"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "note-extractor-bertone.firebaseapp.com"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "note-extractor-bertone"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "note-extractor-bertone.firebasestorage.app"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "562498146956"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:562498146956:web:f47d1c84f3f01f919c21a9"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: GEMINI_API_KEY
+    value: "REPLACE_WITH_YOUR_GEMINI_API_KEY"
+    availability:
+      - RUNTIME
