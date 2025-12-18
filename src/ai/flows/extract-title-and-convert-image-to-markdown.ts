@@ -37,13 +37,34 @@ const extractTitleAndConvertImageToMarkdownPrompt = ai.definePrompt({
 
   Your task is to extract a relevant title from the image and convert the image content into a markdown file.
   The title should be used for naming both the image file and the markdown file.
-  Optimize the markdown format for Obsidian, taking into account the content observed in the note image.
+  Optimize the markdown format for Obsidian, with an exact copy of the content observed in the note image.
 
   Here is the image of the note:
   {{media url=imageUrl}}
 
   Analyze the image and extract the title (a concise, filename-friendly title). Convert the note content into Markdown optimized for Obsidian. Output a JSON object with the keys: title (string) and markdownContent (string).
-`,
+
+  This is an example of a markdown note. Note that encapsulated latex uses $ for inline and $$ for display mode.
+
+  ---
+  date: 2024-09-12
+  draft: false
+  tags:
+    - math/métodos_II
+  ---
+
+  # Argumento funcional no delta de Dirac
+  $$
+  \delta[f(x)] = \sum_{i=1}^{k} \frac{\delta(x - x_i)}{|f'(x_i)|}
+  $$
+  Onde $x_i$ são os zeros da função
+  #### Exemplo
+  ![[Pastedimage20240914141121.png|350]]
+
+  # References
+  [[Métodos Matemáticos - V2 - Jayme Vaz.pdf]]
+  [[Delta de Dirac]]
+  `,
 });
 
 const extractTitleAndConvertImageToMarkdownFlow = ai.defineFlow(
