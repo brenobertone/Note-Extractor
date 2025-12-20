@@ -129,7 +129,14 @@ export default function EditNotePage() {
         <form onSubmit={handleSubmit} className="min-h-[calc(100vh-4rem)]">
           <div className="flex flex-col md:flex-row">
             {/* Image pane */}
-            <div className="md:w-3/5 md:h-[calc(100vh-4rem)] md:sticky md:top-16 bg-black flex items-center justify-center">
+            <div className="md:w-3/5 md:h-[calc(100vh-4rem)] md:sticky md:top-16 bg-black flex items-center justify-center relative">
+              {/* Floating back button overlay */}
+              <div className="absolute top-4 left-4 z-20">
+                <Button type="button" variant="ghost" size="icon" onClick={() => router.back()}>
+                  <ArrowLeft />
+                </Button>
+              </div>
+
               {!imageUrl ? (
                 <div className="w-full h-full flex items-center justify-center">
                   <Skeleton className="h-24 w-24" />
