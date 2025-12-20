@@ -125,63 +125,68 @@ export default function EditNotePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-8">
-        <form onSubmit={handleSubmit}>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                 <Button type="button" variant="ghost" size="icon" onClick={() => router.back()}>
-                    <ArrowLeft />
-                 </Button>
-                 <CardTitle>Edit Note</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="md:w-1/2">
-                  {!imageUrl ? (
-                    <div className="h-48 md:h-full rounded-md overflow-hidden border bg-card flex items-center justify-center">
-                      <Skeleton className="h-24 w-24" />
-                    </div>
-                  ) : (
-                    <div className="relative aspect-video rounded-md overflow-hidden border">
-                      <Image
-                        src={imageUrl}
-                        alt={title || 'Note image'}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover"
+      <main className="flex-1 w-full max-w-none mx-auto p-0 md:p-0">
+        <form onSubmit={handleSubmit} className="min-h-[calc(100vh-4rem)]">
+          <div className="flex flex-col md:flex-row">
+            {/* Image pane */}
+            <div className="md:w-3/5 md:h-[calc(100vh-4rem)] md:sticky md:top-16 bg-black flex items-center justify-center">
+              {!imageUrl ? (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Skeleton className="h-24 w-24" />
+                </div>
+              ) : (
+                <div className="relative w-full h-[calc(100vh-4rem)]">
+                  <Image
+                    src={imageUrl}
+                    alt={title || 'Note image'}
+                    fill
+                    sizes="100vw"
+                    className="object-contain bg-black"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Editor pane */}
+            <div className="md:w-2/5 p-4 md:p-8 overflow-auto">
+              <Card className="w-full">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                     <Button type="button" variant="ghost" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft />
+                     </Button>
+                     <CardTitle>Edit Note</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
                       />
                     </div>
-                  )}
-                </div>
-                <div className="md:flex-1 space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                    />
+                    <div className="space-y-2">
+                      <Label htmlFor="markdownContent">Markdown Content</Label>
+                      <Textarea
+                        id="markdownContent"
+                        value={markdownContent}
+                        onChange={(e) => setMarkdownContent(e.target.value)}
+                        required
+                        className="min-h-[60vh]"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="markdownContent">Markdown Content</Label>
-                    <Textarea
-                      id="markdownContent"
-                      value={markdownContent}
-                      onChange={(e) => setMarkdownContent(e.target.value)}
-                      required
-                      className="h-64"
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button type="submit">Save Changes</Button>
-            </CardFooter>
-          </Card>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit">Save Changes</Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
         </form>
       </main>
     </div>
