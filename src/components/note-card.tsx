@@ -160,19 +160,16 @@ export default function NoteCard({ note }: NoteCardProps) {
           <>
             <Button onClick={handleDownload} className="flex-1 bg-green-600 hover:bg-green-700">
               <FileDown className="mr-2 h-4 w-4" />
-              Download
             </Button>
             <Link href={`/notes/${note.id}/edit`} passHref className="flex-1">
                <Button variant="outline" className="w-full">
                   <Pencil className="mr-2 h-4 w-4" />
-                  Edit
                </Button>
             </Link>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" className="flex-1 bg-red-600 hover:bg-red-700">
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
