@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,8 +22,9 @@ export default function EditNotePage() {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
+  const noteId = Array.isArray(id) ? id[0] : id;
   const [notes, setNotes] = useAtom(notesAtom);
-  const note = notes.find((n) => n.id === id);
+  const note = notes.find((n) => n.id === noteId);
 
   const [title, setTitle] = useState("");
   const [markdownContent, setMarkdownContent] = useState("");
@@ -34,6 +36,30 @@ export default function EditNotePage() {
       setMarkdownContent(note.markdownContent || "");
     }
   }, [note]);
+
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!note) {
+      setImageUrl(null);
+      return;
+    }
+
+    // Prefer persisted imageUrl, fallback to previewUrl
+    if (note.imageUrl) {
+      setImageUrl(note.imageUrl);
+      return;
+    }
+    if (note.previewUrl) {
+      setImageUrl(note.previewUrl);
+    }
+
+    return () => {
+      if (note?.previewUrl && note.status !== 'processing') {
+        try { URL.revokeObjectURL(note.previewUrl); } catch (e) { /* ignore */ }
+      }
+    };
+  }, [note?.previewUrl, note?.status, note?.imageUrl, note]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,25 +136,46 @@ export default function EditNotePage() {
                  <CardTitle>Edit Note</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="markdownContent">Markdown Content</Label>
-                <Textarea
-                  id="markdownContent"
-                  value={markdownContent}
-                  onChange={(e) => setMarkdownContent(e.target.value)}
-                  required
-                  className="h-64"
-                />
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="md:w-1/2">
+                  {!imageUrl ? (
+                    <div className="h-48 md:h-full rounded-md overflow-hidden border bg-card flex items-center justify-center">
+                      <Skeleton className="h-24 w-24" />
+                    </div>
+                  ) : (
+                    <div className="relative aspect-video rounded-md overflow-hidden border">
+                      <Image
+                        src={imageUrl}
+                        alt={title || 'Note image'}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="md:flex-1 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="markdownContent">Markdown Content</Label>
+                    <Textarea
+                      id="markdownContent"
+                      value={markdownContent}
+                      onChange={(e) => setMarkdownContent(e.target.value)}
+                      required
+                      className="h-64"
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
             <CardFooter>
