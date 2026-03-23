@@ -59,31 +59,27 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to start using SnapFlow.
 
-## 🧪 Testing
+## 🧪 Testing & CI/CD
 
-### Unit Tests (Vitest)
+SnapFlow uses a multi-layered validation strategy to ensure code quality and prevent regressions.
 
-Tests for individual components and API logic using mocks.
+### 🛡️ Validation Layers
 
-```bash
-npm run test
-```
+| Layer | Environment | Trigger | Scope |
+| :--- | :--- | :--- | :--- |
+| **Pre-commit** | Local | `git commit` | Lint, Types, Unit Tests, Integration Tests |
+| **CI (GitHub)** | Linux VM | `git push` | All standard checks + **Full Build** |
+| **Manual** | Local | Developer | E2E (Playwright) |
 
-### Integration Tests (Database)
+### ⚓ Local Commands
 
-Verify the connection to your local Docker database:
+- **Unit Tests**: `npm run test` (Fast, mocks external services)
+- **Integration Tests**: `npm run test:integration` (Requires local Supabase Docker)
+- **E2E Tests**: `npx playwright test` (Browser-based flow)
+- **Format Fix**: `npm run format:write`
 
-```bash
-npx tsx src/scripts/test-db-connection.ts
-```
-
-### E2E Tests (Playwright)
-
-Browser-based verification of the entire user flow.
-
-```bash
-npx playwright test
-```
+### 🤖 CI Workflow (GitHub Actions)
+Our [.github/workflows/ci.yml](.github/workflows/ci.yml) uses the **Supabase CLI** to start a full local stack in the cloud. It dynamically extracts JWT keys at runtime using `supabase status -o json` to maintain perfect security without hardcoding secrets.
 
 ## 📂 Project Structure
 
@@ -92,6 +88,15 @@ npx playwright test
 - `/src/__tests__`: Unit and Integration test suites.
 - `/e2e`: Playwright end-to-end specifications.
 - `/supabase`: Database migrations and configuration.
+- `.agent/rules.md`: Local AI instructions for consistent development.
+
+## 🌟 Best Practices for Advancing
+To keep SnapFlow robust as you add features:
+
+1. **Follow TDD**: Always add a test in `src/__tests__` before implementing a new API route or complex component.
+2. **Schema-First**: When changing the database, use `npx supabase db diff` to generate migrations. Never edit the DB directly.
+3. **Secret Hygiene**: Use the `supabase status` method for keys in CI. Never commit `sb_` keys to the repository.
+4. **Isolate Logic**: Keep LLM prompts and parsing in dedicated utility files as the complexity of your extractions grows.
 
 ---
 
