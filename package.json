@@ -13,7 +13,8 @@
     "format:write": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "vitest run src/__tests__/integration"
+    "test:integration": "vitest run src/__tests__/integration",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.47",
@@ -38,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "happy-dom": "^20.8.4",
+    "husky": "^9.1.7",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5",

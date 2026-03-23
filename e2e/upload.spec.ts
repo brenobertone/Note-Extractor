@@ -8,7 +8,7 @@ test('has title and upload component', async ({ page }) => {
 
   // Check if upload component is present
   const uploadButton = page.getByRole('button', {
-    name: 'Upload',
+    name: 'Upload & Categorize',
     exact: true,
   });
   await expect(uploadButton).toBeVisible();
