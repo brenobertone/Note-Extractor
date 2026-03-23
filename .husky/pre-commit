@@ -1,1 +1,1 @@
-npm run test && npm run test:integration
+npm run lint && npm run type-check && npm run test && npm run test:integration

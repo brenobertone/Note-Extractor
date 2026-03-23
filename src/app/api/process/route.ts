@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     let processedData;
     try {
       processedData = JSON.parse(llmResponse);
-    } catch (e) {
+    } catch {
       // Fallback if LLM doesn't return valid JSON
       processedData = { content: llmResponse, category: 'Tasks' };
     }
@@ -76,8 +76,9 @@ export async function POST(request: NextRequest) {
         category: processedData.category,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

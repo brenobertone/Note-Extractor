@@ -12,10 +12,13 @@ describe('UploadComponent', () => {
   });
 
   it('uploads a file to /api/process', async () => {
-    (fetch as any).mockResolvedValue({
+    vi.mocked(fetch).mockResolvedValue({
       ok: true,
-      json: async () => ({ message: 'Success' }),
-    });
+      json: async () => ({
+        success: true,
+        data: { content: 'Success', category: 'Tasks' },
+      }),
+    } as Response);
 
     render(<UploadComponent />);
 

@@ -33,8 +33,9 @@ const UploadComponent = () => {
 
       setResult(result.data);
       setFile(null);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Upload failed';
+      setError(message);
     } finally {
       setIsUploading(false);
     }
