@@ -7,6 +7,7 @@ Always read these rules before starting any task in this repository.
 - **TDD Workflow**: You must always write a test before the implementation.
 - **Auto-Commits**: Always perform a `git commit` to mark successful progress.
 - **Fail-Safe Checks**: Never force a commit. Let the `husky` pre-commit hooks ensure that `npm run test` and `npm run test:integration` currently pass.
+- **Secret Hygiene**: Never hardcode real-looking secrets (like `sb_publishable_*` or `sb_secret_*`) in code or CI configs. Use dynamic extraction (`supabase status -o json`) or GitHub Secrets.
 
 ## 🔗 Architecture
 

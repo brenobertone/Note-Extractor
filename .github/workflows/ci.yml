@@ -10,21 +10,6 @@ jobs:
   validate:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 54322:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -56,16 +41,37 @@ jobs:
       - name: Unit Tests
         run: npm run test
 
-      - name: Run Database Migrations
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase
+        run: supabase start
+
+      - name: Wait for Supabase Health
         run: |
-          sudo apt-get install -y postgresql-client
-          PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -f supabase/migrations/20260323000000_create_user_actions.sql
+          for i in {1..30}; do
+            if curl -s -o /dev/null http://127.0.0.1:54321/rest/v1/; then
+              echo "Supabase API is healthy!"
+              exit 0
+            fi
+            echo "Waiting for Supabase API... ($i/30)"
+            sleep 5
+          done
+          echo "Supabase API failed to start in time"
+          exit 1
+
+      - name: Get Supabase Keys
+        id: supabase_keys
+        run: |
+          # Use jq to extract keys safely from the CLI status
+          echo "SUPABASE_ANON_KEY=$(supabase status -o json | jq -r '.anon_key')" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_KEY=$(supabase status -o json | jq -r '.service_role_key')" >> $GITHUB_ENV
 
       - name: Integration Tests
         run: npm run test:integration
         env:
-          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-          SUPABASE_SERVICE_ROLE_KEY: postgresql://postgres:postgres@localhost:54322/postgres
-          # Note: The Supabase client can take a direct connection string as the key in some contexts,
-          # but for simplicity in CI with the standard client, we might need a workaround or use the direct DB client.
-          # However, for this CI, we'll aim to point the client to our service container.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_KEY }}
