@@ -65,11 +65,11 @@ SnapFlow uses a multi-layered validation strategy to ensure code quality and pre
 
 ### 🛡️ Validation Layers
 
-| Layer | Environment | Trigger | Scope |
-| :--- | :--- | :--- | :--- |
-| **Pre-commit** | Local | `git commit` | Lint, Types, Unit Tests, Integration Tests |
-| **CI (GitHub)** | Linux VM | `git push` | All standard checks + **Full Build** + **E2E Tests** |
-| **Manual** | Local | Developer | Quick feedback on UI changes |
+| Layer           | Environment | Trigger      | Scope                                                |
+| :-------------- | :---------- | :----------- | :--------------------------------------------------- |
+| **Pre-commit**  | Local       | `git commit` | Lint, Types, Unit Tests, Integration Tests           |
+| **CI (GitHub)** | Linux VM    | `git push`   | All standard checks + **Full Build** + **E2E Tests** |
+| **Manual**      | Local       | Developer    | Quick feedback on UI changes                         |
 
 ### ⚓ Local Commands
 
@@ -79,6 +79,7 @@ SnapFlow uses a multi-layered validation strategy to ensure code quality and pre
 - **Format Fix**: `npm run format:write`
 
 ### 🤖 CI Workflow (GitHub Actions)
+
 Our [.github/workflows/ci.yml](.github/workflows/ci.yml) uses the **Supabase CLI** to start a full local stack in the cloud. It dynamically extracts JWT keys at runtime using `supabase status -o json` to maintain perfect security without hardcoding secrets.
 
 ## 📂 Project Structure
@@ -91,6 +92,7 @@ Our [.github/workflows/ci.yml](.github/workflows/ci.yml) uses the **Supabase CLI
 - `.agent/rules.md`: Local AI instructions for consistent development.
 
 ## 🌟 Best Practices for Advancing
+
 To keep SnapFlow robust as you add features:
 
 1. **Follow TDD**: Always add a test in `src/__tests__` before implementing a new API route or complex component.
