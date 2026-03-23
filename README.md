@@ -68,8 +68,8 @@ SnapFlow uses a multi-layered validation strategy to ensure code quality and pre
 | Layer | Environment | Trigger | Scope |
 | :--- | :--- | :--- | :--- |
 | **Pre-commit** | Local | `git commit` | Lint, Types, Unit Tests, Integration Tests |
-| **CI (GitHub)** | Linux VM | `git push` | All standard checks + **Full Build** |
-| **Manual** | Local | Developer | E2E (Playwright) |
+| **CI (GitHub)** | Linux VM | `git push` | All standard checks + **Full Build** + **E2E Tests** |
+| **Manual** | Local | Developer | Quick feedback on UI changes |
 
 ### ⚓ Local Commands
 
