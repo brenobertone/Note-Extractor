@@ -36,4 +36,34 @@ describe('Database Integration', () => {
 
     expect(deleteError).toBeNull();
   });
+
+  it('can insert combined content from multiple images', async () => {
+    const testData = {
+      content: 'Buy milk and exercise daily - Combined from multiple images',
+      category: 'Tasks',
+    };
+
+    // Insert
+    const { data, error } = await supabase
+      .from('user_actions')
+      .insert([testData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error:', error);
+    }
+
+    expect(error).toBeNull();
+    expect(data).toMatchObject(testData);
+    expect(data.content).toContain('Combined from multiple images');
+
+    // Cleanup
+    const { error: deleteError } = await supabase
+      .from('user_actions')
+      .delete()
+      .eq('id', data.id);
+
+    expect(deleteError).toBeNull();
+  });
 });

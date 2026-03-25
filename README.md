@@ -5,6 +5,7 @@ SnapFlow is an intelligent note extraction application that transforms your phys
 ## 🚀 Key Features
 
 - **AI Text Extraction**: Instantly extracts text from uploaded images using GPT-4o.
+- **Multi-Image Upload**: Upload multiple images at once for combined analysis as a related package.
 - **Auto-Categorization**: Intelligently separates "Tasks" (to-do items) from "Habits" (recurring behaviors).
 - **Local Infrastructure**: Runs a complete Supabase stack locally using Docker for development.
 - **Tested with TDD**: Built with a strict Test-Driven Development workflow using Vitest and Playwright.
@@ -58,6 +59,22 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to start using SnapFlow.
+
+## 📸 Usage
+
+### Single Image Upload
+
+Click "Choose File", select an image, and click "Upload & Categorize". SnapFlow will extract text and categorize it automatically.
+
+### Multi-Image Upload
+
+1. Click "Choose File" and select multiple images (Cmd/Ctrl+Click or Shift+Click)
+2. The UI will display the number of selected files
+3. Click "Upload & Categorize"
+4. GPT-4o will analyze all images together, understanding them as a related package
+5. The combined content will be categorized and saved as a single entry
+
+**Example use case**: Upload photos of whiteboard notes from a brainstorming session, and SnapFlow will combine them into one cohesive task list.
 
 ## 🧪 Testing & CI/CD
 

@@ -3,21 +3,28 @@
 import React, { useState } from 'react';
 
 const UploadComponent = () => {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      setFiles(Array.from(e.target.files));
     }
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (files.length === 0) return;
 
     setIsUploading(true);
     const formData = new FormData();
-    formData.append('file', file);
+
+    // Append all files with 'files' key for multi-image processing
+    if (files.length > 1) {
+      files.forEach((file) => formData.append('files', file));
+    } else {
+      // Keep backward compatibility for single file
+      formData.append('file', files[0]);
+    }
 
     try {
       const response = await fetch('/api/process', {
@@ -32,7 +39,7 @@ const UploadComponent = () => {
       }
 
       setResult(result.data);
-      setFile(null);
+      setFiles([]);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       setError(message);
@@ -59,6 +66,7 @@ const UploadComponent = () => {
         id="image-upload"
         type="file"
         accept="image/*"
+        multiple
         onChange={handleFileChange}
         className="block w-full text-sm text-zinc-500
           file:mr-4 file:py-2 file:px-4
@@ -68,6 +76,12 @@ const UploadComponent = () => {
           hover:file:bg-indigo-100
           dark:file:bg-zinc-800 dark:file:text-zinc-400"
       />
+
+      {files.length > 0 && (
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          {files.length} {files.length === 1 ? 'file' : 'files'} selected
+        </p>
+      )}
 
       {error && (
         <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-100">
@@ -86,7 +100,7 @@ const UploadComponent = () => {
 
       <button
         onClick={handleUpload}
-        disabled={!file || isUploading}
+        disabled={files.length === 0 || isUploading}
         className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors w-full sm:w-auto font-medium"
       >
         {isUploading ? 'Processing...' : 'Upload & Categorize'}

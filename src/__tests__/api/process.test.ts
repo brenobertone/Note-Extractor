@@ -22,11 +22,28 @@ vi.mock('ai', async (importOriginal) => {
   const actual = await importOriginal<typeof import('ai')>();
   return {
     ...actual,
-    generateText: vi.fn().mockResolvedValue({
-      text: JSON.stringify({
-        content: 'Buy milk',
-        category: 'Tasks',
-      }),
+    generateText: vi.fn().mockImplementation(async ({ messages }) => {
+      // Count how many images are in the request
+      const imageCount = messages[0].content.filter(
+        (item: { type: string }) => item.type === 'image'
+      ).length;
+
+      // Return different content based on number of images
+      if (imageCount > 1) {
+        return {
+          text: JSON.stringify({
+            content: 'Buy milk and exercise daily',
+            category: 'Tasks',
+          }),
+        };
+      }
+
+      return {
+        text: JSON.stringify({
+          content: 'Buy milk',
+          category: 'Tasks',
+        }),
+      };
     }),
   };
 });
@@ -51,6 +68,37 @@ describe('POST /api/process', () => {
         success: true,
         data: expect.objectContaining({
           content: 'Buy milk',
+          category: 'Tasks',
+        }),
+      })
+    );
+  });
+
+  it('should process multiple images together and return unified content', async () => {
+    const formData = new FormData();
+    const file1 = new File(['mock content 1'], 'test1.png', {
+      type: 'image/png',
+    });
+    const file2 = new File(['mock content 2'], 'test2.png', {
+      type: 'image/png',
+    });
+    formData.append('files', file1);
+    formData.append('files', file2);
+
+    const request = new NextRequest('http://localhost:3000/api/process', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const response = await POST(request);
+    const result = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({
+          content: 'Buy milk and exercise daily',
           category: 'Tasks',
         }),
       })
