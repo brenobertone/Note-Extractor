@@ -12,15 +12,40 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File;
 
-    if (!file) {
+    // Support both single file and multiple files
+    const files = formData.getAll('files') as File[];
+    const singleFile = formData.get('file') as File | null;
+
+    const filesToProcess =
+      files.length > 0 ? files : singleFile ? [singleFile] : [];
+
+    if (filesToProcess.length === 0) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    // Convert file to base64 for LLM
-    const bytes = await file.arrayBuffer();
-    const base64Image = Buffer.from(bytes).toString('base64');
+    // Convert all files to base64 for LLM
+    const base64Images = await Promise.all(
+      filesToProcess.map(async (file) => {
+        const bytes = await file.arrayBuffer();
+        return Buffer.from(bytes).toString('base64');
+      })
+    );
+
+    // Build content array with text prompt and all images
+    const content = [
+      {
+        type: 'text' as const,
+        text:
+          filesToProcess.length > 1
+            ? 'You will receive multiple images. Extract and combine the main text from all images, understanding them as a related package. Categorize the combined content as either "Tasks" or "Habits". Respond with only a JSON object like {"content": "combined text here", "category": "Tasks"}.'
+            : 'Extract the main text from this image and categorize it as either "Tasks" or "Habits". Respond with only a JSON object like {"content": "text here", "category": "Tasks"}.',
+      },
+      ...base64Images.map((image) => ({
+        type: 'image' as const,
+        image,
+      })),
+    ];
 
     // Call LLM
     const { text: llmResponse } = await generateText({
@@ -28,16 +53,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Extract the main text from this image and categorize it as either "Tasks" or "Habits". Respond with only a JSON object like {"content": "text here", "category": "Tasks"}.',
-            },
-            {
-              type: 'image',
-              image: base64Image,
-            },
-          ],
+          content,
         },
       ],
     });
