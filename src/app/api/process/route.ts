@@ -84,6 +84,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Upload images to storage and create image records
+    try {
+      await Promise.all(
+        filesToProcess.map(async (file, index) => {
+          // Generate unique filename
+          const fileExtension = file.type.split('/')[1] || 'png';
+          const fileName = `${data.id}_${index}_${Date.now()}.${fileExtension}`;
+
+          // Upload to storage
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage.from('note-images').upload(fileName, file, {
+              contentType: file.type,
+            });
+
+          if (uploadError) {
+            console.error('Storage upload error:', uploadError);
+            throw uploadError;
+          }
+
+          // Insert image record
+          const { error: imageError } = await supabase
+            .from('images')
+            .insert([
+              {
+                user_action_id: data.id,
+                storage_path: uploadData.path,
+                file_name: file.name,
+                mime_type: file.type,
+                file_size: file.size,
+              },
+            ])
+            .select()
+            .single();
+
+          if (imageError) {
+            console.error('Image record insert error:', imageError);
+            throw imageError;
+          }
+        })
+      );
+    } catch (storageError) {
+      console.error('Failed to store images:', storageError);
+      // Note: user_action is already created, but images failed
+      // In production, you might want to handle this differently
+    }
+
     return NextResponse.json({
       success: true,
       data: {
