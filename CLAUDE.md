@@ -136,7 +136,11 @@ Never edit the database directly without creating a migration.
 ### Git Workflow
 
 - **Never commit directly to main**: Always create a feature branch and open a PR for review
-- **Pre-commit hooks** (via Husky): Run format, lint, type-check, unit tests, and integration tests
+- **Pre-commit hooks** (via Husky + lint-staged):
+  - lint-staged: Auto-formats and lints staged files, then re-stages them
+  - Type-check: Validates TypeScript across entire codebase
+  - Unit tests: Runs all unit tests (mocked, fast)
+  - Integration tests: Validates database operations with real Supabase
 - **Auto-commits encouraged**: Commit frequently to mark progress on your feature branch
 - **Never force commits**: Let pre-commit hooks fail if tests break
 - **CI Pipeline**: GitHub Actions validates on push (includes full build + E2E tests)
@@ -171,6 +175,16 @@ Never edit the database directly without creating a migration.
 2. Keep LLM prompts and parsing logic in dedicated utility files if complexity grows
 3. Update README.md when architectural patterns change
 4. Ensure integration tests cover new database operations
+
+### lint-staged Benefits
+
+The project uses lint-staged to automatically format and lint files during pre-commit:
+
+- **Auto-formatting**: Prettier runs on all staged files and re-stages them automatically
+- **Auto-fixing**: ESLint fixes issues on staged TypeScript/JavaScript files
+- **Prevents CI failures**: All formatting issues are caught and fixed locally before push
+- **Handles special characters**: Works correctly with files like `[id]/route.ts` that have glob-pattern characters
+- **Faster commits**: Only runs on staged files, not the entire codebase
 
 ### Environment Variables
 
