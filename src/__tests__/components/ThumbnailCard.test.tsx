@@ -60,7 +60,13 @@ describe('ThumbnailCard', () => {
   };
 
   it('should render image with correct src', () => {
-    render(<ThumbnailCard action={mockActionSingleImage} onClick={() => {}} onDelete={() => {}} />);
+    render(
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={() => {}}
+        onDelete={() => {}}
+      />
+    );
 
     const img = screen.getByRole('img');
     expect(img).toHaveAttribute('src', 'http://localhost/test/image1.png');
@@ -68,7 +74,11 @@ describe('ThumbnailCard', () => {
 
   it('should show multi-image badge when images.length > 1', () => {
     render(
-      <ThumbnailCard action={mockActionMultipleImages} onClick={() => {}} onDelete={() => {}} />
+      <ThumbnailCard
+        action={mockActionMultipleImages}
+        onClick={() => {}}
+        onDelete={() => {}}
+      />
     );
 
     const badge = screen.getByText('+1');
@@ -76,14 +86,26 @@ describe('ThumbnailCard', () => {
   });
 
   it('should not show badge when only one image', () => {
-    render(<ThumbnailCard action={mockActionSingleImage} onClick={() => {}} onDelete={() => {}} />);
+    render(
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={() => {}}
+        onDelete={() => {}}
+      />
+    );
 
     const badge = screen.queryByText('+');
     expect(badge).not.toBeInTheDocument();
   });
 
   it('should display category label', () => {
-    render(<ThumbnailCard action={mockActionSingleImage} onClick={() => {}} onDelete={() => {}} />);
+    render(
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={() => {}}
+        onDelete={() => {}}
+      />
+    );
 
     const categoryLabel = screen.getByText('Tasks');
     expect(categoryLabel).toBeInTheDocument();
@@ -92,7 +114,11 @@ describe('ThumbnailCard', () => {
   it('should call onClick when clicked', () => {
     const mockOnClick = vi.fn();
     render(
-      <ThumbnailCard action={mockActionSingleImage} onClick={mockOnClick} onDelete={() => {}} />
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={mockOnClick}
+        onDelete={() => {}}
+      />
     );
 
     const card = screen.getByRole('img').parentElement;
@@ -103,7 +129,11 @@ describe('ThumbnailCard', () => {
 
   it('should have hover effects via CSS classes', () => {
     const { container } = render(
-      <ThumbnailCard action={mockActionSingleImage} onClick={() => {}} onDelete={() => {}} />
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={() => {}}
+        onDelete={() => {}}
+      />
     );
 
     const card = container.firstChild;
@@ -113,7 +143,11 @@ describe('ThumbnailCard', () => {
 
   it('should show delete button', () => {
     render(
-      <ThumbnailCard action={mockActionSingleImage} onClick={() => {}} onDelete={() => {}} />
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={() => {}}
+        onDelete={() => {}}
+      />
     );
 
     const deleteButton = screen.getByLabelText('Delete note');
@@ -125,7 +159,11 @@ describe('ThumbnailCard', () => {
     mockConfirm.mockReturnValue(true);
 
     render(
-      <ThumbnailCard action={mockActionSingleImage} onClick={() => {}} onDelete={mockOnDelete} />
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={() => {}}
+        onDelete={mockOnDelete}
+      />
     );
 
     const deleteButton = screen.getByLabelText('Delete note');
@@ -142,7 +180,11 @@ describe('ThumbnailCard', () => {
     mockConfirm.mockReturnValue(false);
 
     render(
-      <ThumbnailCard action={mockActionSingleImage} onClick={() => {}} onDelete={mockOnDelete} />
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={() => {}}
+        onDelete={mockOnDelete}
+      />
     );
 
     const deleteButton = screen.getByLabelText('Delete note');
@@ -158,7 +200,11 @@ describe('ThumbnailCard', () => {
     mockConfirm.mockReturnValue(true);
 
     render(
-      <ThumbnailCard action={mockActionSingleImage} onClick={mockOnClick} onDelete={mockOnDelete} />
+      <ThumbnailCard
+        action={mockActionSingleImage}
+        onClick={mockOnClick}
+        onDelete={mockOnDelete}
+      />
     );
 
     const deleteButton = screen.getByLabelText('Delete note');

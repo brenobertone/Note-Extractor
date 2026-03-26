@@ -8,7 +8,11 @@ interface ThumbnailCardProps {
   onDelete: (id: number) => void;
 }
 
-export default function ThumbnailCard({ action, onClick, onDelete }: ThumbnailCardProps) {
+export default function ThumbnailCard({
+  action,
+  onClick,
+  onDelete,
+}: ThumbnailCardProps) {
   const thumbnailImage = action.images[0];
 
   if (!thumbnailImage || !thumbnailImage.publicUrl) {

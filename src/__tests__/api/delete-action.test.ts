@@ -56,7 +56,9 @@ describe('DELETE /api/actions/[id]', () => {
     mockRemove.mockResolvedValue({ data: null, error: null });
 
     const request = new NextRequest('http://localhost:3000/api/actions/1');
-    const response = await DELETE(request, { params: Promise.resolve({ id: '1' }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: '1' }),
+    });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -80,7 +82,9 @@ describe('DELETE /api/actions/[id]', () => {
     }));
 
     const request = new NextRequest('http://localhost:3000/api/actions/999');
-    const response = await DELETE(request, { params: Promise.resolve({ id: '999' }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: '999' }),
+    });
 
     expect(response.status).toBe(404);
   });
@@ -109,7 +113,9 @@ describe('DELETE /api/actions/[id]', () => {
     });
 
     const request = new NextRequest('http://localhost:3000/api/actions/1');
-    const response = await DELETE(request, { params: Promise.resolve({ id: '1' }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: '1' }),
+    });
 
     expect(response.status).toBe(200); // Should still succeed
   });

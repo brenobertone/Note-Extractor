@@ -31,10 +31,7 @@ export async function DELETE(
       .single();
 
     if (fetchError || !action) {
-      return NextResponse.json(
-        { error: 'Action not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Action not found' }, { status: 404 });
     }
 
     // Delete images from storage
@@ -61,10 +58,7 @@ export async function DELETE(
 
     if (deleteError) {
       console.error('Database deletion error:', deleteError);
-      return NextResponse.json(
-        { error: deleteError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'Action deleted successfully' });

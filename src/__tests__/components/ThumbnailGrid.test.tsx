@@ -128,7 +128,8 @@ describe('ThumbnailGrid', () => {
     mockConfirm.mockReturnValue(true);
 
     // Setup initial fetch
-    global.fetch = vi.fn()
+    global.fetch = vi
+      .fn()
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ data: mockActions }),
@@ -152,10 +153,9 @@ describe('ThumbnailGrid', () => {
 
     // Verify delete API was called
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        '/api/actions/1',
-        { method: 'DELETE' }
-      );
+      expect(global.fetch).toHaveBeenCalledWith('/api/actions/1', {
+        method: 'DELETE',
+      });
     });
 
     // Verify item was removed from UI
@@ -169,7 +169,8 @@ describe('ThumbnailGrid', () => {
     mockConfirm.mockReturnValue(true);
 
     // Setup initial fetch
-    global.fetch = vi.fn()
+    global.fetch = vi
+      .fn()
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ data: mockActions }),
