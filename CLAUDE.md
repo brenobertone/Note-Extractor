@@ -44,28 +44,60 @@ npm run format:check            # Check formatting
 
 ### Core Flow
 
-1. User uploads image via `UploadComponent` (frontend)
+1. User uploads image(s) via `UploadComponent` (frontend)
 2. POST to `/api/process` with FormData
-3. API route converts image to base64, sends to OpenAI GPT-4o
+3. API route converts images to base64, sends to OpenAI GPT-4o
 4. LLM returns JSON: `{content: string, category: "Tasks"|"Habits"}`
 5. Data persisted to `user_actions` table in Supabase
-6. Response returned to frontend
+6. Images uploaded to Supabase Storage (`note-images` bucket)
+7. Image metadata stored in `images` table with foreign key to `user_actions`
+8. Response returned to frontend, gallery auto-refreshes
+9. GET from `/api/actions` retrieves actions with nested images and public URLs
+10. `ThumbnailGrid` displays clickable thumbnails in 4-column grid
+11. `ImageModal` shows full-size images with extracted text
+12. User can hover over thumbnails to reveal delete button
+13. DELETE to `/api/actions/[id]` removes images from storage and cascades database deletion
 
 ### Key Files
 
-- **API Route**: `src/app/api/process/route.ts` - Main processing endpoint
-- **Database Schema**: `supabase/migrations/20260323000000_create_user_actions.sql`
-- **Frontend**: `src/components/UploadComponent.tsx`
-- **Unit Tests**: `src/__tests__/api/process.test.ts` (mocks Supabase & OpenAI)
-- **Integration Tests**: `src/__tests__/integration/database.test.ts` (real Supabase)
-- **E2E Tests**: `e2e/upload.spec.ts` (Playwright)
+- **API Routes**:
+  - `src/app/api/process/route.ts` - POST endpoint for image processing and storage
+  - `src/app/api/actions/route.ts` - GET endpoint for retrieving actions with images
+  - `src/app/api/actions/[id]/route.ts` - DELETE endpoint for removing actions and images
+- **Database Schema**:
+  - `supabase/migrations/20260323000000_create_user_actions.sql` - User actions table
+  - `supabase/migrations/20260325000000_add_images_table.sql` - Images table + storage bucket
+- **Frontend Components**:
+  - `src/components/UploadComponent.tsx` - File upload with multi-image support
+  - `src/components/ThumbnailGrid.tsx` - 4-column gallery with auto-refresh and delete handler
+  - `src/components/ThumbnailCard.tsx` - Individual thumbnail with category label and delete button (visible on hover)
+  - `src/components/ImageModal.tsx` - Full-screen modal with image carousel
+  - `src/app/page.tsx` - Main page integrating all components
+- **Types**: `src/types/index.ts` - TypeScript interfaces for `Image` and `UserAction`
+- **Unit Tests**:
+  - `src/__tests__/api/process.test.ts` - Process API with storage mocks
+  - `src/__tests__/api/actions.test.ts` - Actions API with pagination tests
+  - `src/__tests__/api/delete-action.test.ts` - Delete API with cascade deletion
+  - `src/__tests__/components/*.test.tsx` - Component tests (includes delete button tests)
+- **Integration Tests**:
+  - `src/__tests__/integration/database.test.ts` - Database operations
+  - `src/__tests__/integration/storage.test.ts` - Storage bucket operations
+  - `src/__tests__/integration/delete-action.test.ts` - Delete with cascade verification
+- **E2E Tests**:
+  - `e2e/upload.spec.ts` - Basic upload flow
+  - `e2e/multi-upload.spec.ts` - Multi-image upload
+  - `e2e/thumbnail-gallery.spec.ts` - Gallery interactions and modal (10 tests)
 
 ### Database
 
 - Local Supabase stack runs via Docker (`npx supabase start`)
 - Schema defined in SQL migrations under `supabase/migrations/`
-- Table: `user_actions` with columns: id, content, category, created_at
-- RLS enabled with permissive policy for development
+- **Tables**:
+  - `user_actions`: id, content, category, created_at
+  - `images`: id, user_action_id (FK), storage_path, file_name, mime_type, file_size, created_at
+- **Storage**: `note-images` bucket (public, 10MB limit) created automatically by migration
+- RLS enabled with permissive policies for development
+- Reset database: `npx supabase db reset` (recreates tables + bucket)
 
 ### Testing Strategy
 
@@ -104,7 +136,11 @@ Never edit the database directly without creating a migration.
 ### Git Workflow
 
 - **Never commit directly to main**: Always create a feature branch and open a PR for review
-- **Pre-commit hooks** (via Husky): Run format, lint, type-check, unit tests, and integration tests
+- **Pre-commit hooks** (via Husky + lint-staged):
+  - lint-staged: Auto-formats and lints staged files, then re-stages them
+  - Type-check: Validates TypeScript across entire codebase
+  - Unit tests: Runs all unit tests (mocked, fast)
+  - Integration tests: Validates database operations with real Supabase
 - **Auto-commits encouraged**: Commit frequently to mark progress on your feature branch
 - **Never force commits**: Let pre-commit hooks fail if tests break
 - **CI Pipeline**: GitHub Actions validates on push (includes full build + E2E tests)
@@ -139,6 +175,16 @@ Never edit the database directly without creating a migration.
 2. Keep LLM prompts and parsing logic in dedicated utility files if complexity grows
 3. Update README.md when architectural patterns change
 4. Ensure integration tests cover new database operations
+
+### lint-staged Benefits
+
+The project uses lint-staged to automatically format and lint files during pre-commit:
+
+- **Auto-formatting**: Prettier runs on all staged files and re-stages them automatically
+- **Auto-fixing**: ESLint fixes issues on staged TypeScript/JavaScript files
+- **Prevents CI failures**: All formatting issues are caught and fixed locally before push
+- **Handles special characters**: Works correctly with files like `[id]/route.ts` that have glob-pattern characters
+- **Faster commits**: Only runs on staged files, not the entire codebase
 
 ### Environment Variables
 

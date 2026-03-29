@@ -2,7 +2,11 @@
 
 import React, { useState } from 'react';
 
-const UploadComponent = () => {
+interface UploadComponentProps {
+  onSuccess?: () => void;
+}
+
+const UploadComponent = ({ onSuccess }: UploadComponentProps = {}) => {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -40,6 +44,11 @@ const UploadComponent = () => {
 
       setResult(result.data);
       setFiles([]);
+
+      // Trigger gallery refresh
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       setError(message);

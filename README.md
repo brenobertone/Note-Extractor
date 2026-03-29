@@ -7,6 +7,9 @@ SnapFlow is an intelligent note extraction application that transforms your phys
 - **AI Text Extraction**: Instantly extracts text from uploaded images using GPT-4o.
 - **Multi-Image Upload**: Upload multiple images at once for combined analysis as a related package.
 - **Auto-Categorization**: Intelligently separates "Tasks" (to-do items) from "Habits" (recurring behaviors).
+- **Thumbnail Gallery**: View all previously processed notes in a scrollable 4-column grid with full-size modal preview.
+- **Delete Management**: Hover-to-reveal delete buttons with confirmation dialog for safe note removal.
+- **Image Storage**: All uploaded images are stored in Supabase Storage for future reference.
 - **Local Infrastructure**: Runs a complete Supabase stack locally using Docker for development.
 - **Tested with TDD**: Built with a strict Test-Driven Development workflow using Vitest and Playwright.
 
@@ -40,6 +43,18 @@ npx supabase start
 ```
 
 _Wait for the "Started supabase local development setup" message. Studio will be available at http://127.0.0.1:54323._
+
+**Note:** The database migrations automatically create:
+
+- `user_actions` and `images` tables
+- `note-images` storage bucket with public access
+- RLS policies for development
+
+To reset the database (wipes all data and re-runs migrations):
+
+```bash
+npx supabase db reset
+```
 
 ### 4. Configuration
 
@@ -76,6 +91,28 @@ Click "Choose File", select an image, and click "Upload & Categorize". SnapFlow 
 
 **Example use case**: Upload photos of whiteboard notes from a brainstorming session, and SnapFlow will combine them into one cohesive task list.
 
+### Thumbnail Gallery
+
+After uploading images, all your previous notes appear in the **Previous Notes** section below the upload area:
+
+- **4-Column Grid**: Thumbnails are displayed in a responsive 4-column grid layout
+- **Scrollable**: The gallery scrolls when you have many entries (max-height: 600px)
+- **Visual Indicators**:
+  - Category labels (Tasks/Habits) shown on each thumbnail
+  - Multi-image badge (+N) displays when an action contains multiple source images
+- **Click to View**: Click any thumbnail to open a full-screen modal with:
+  - Full-size image display (left side)
+  - Extracted text content (right side)
+  - Image carousel navigation for multi-image actions
+  - Category badge and timestamp
+- **Delete Notes**: Hover over any thumbnail to reveal a delete button (red trash icon in top-left):
+  - Confirmation dialog prevents accidental deletion
+  - Removes the action, all associated images from storage, and database records
+  - UI updates immediately after deletion
+- **Auto-refresh**: Gallery automatically updates after each successful upload
+
+All images are permanently stored in Supabase Storage (`note-images` bucket) and linked to their corresponding action records in the database.
+
 ## 🧪 Testing & CI/CD
 
 SnapFlow uses a multi-layered validation strategy to ensure code quality and prevent regressions.
@@ -101,12 +138,26 @@ Our [.github/workflows/ci.yml](.github/workflows/ci.yml) uses the **Supabase CLI
 
 ## 📂 Project Structure
 
-- `/src/app`: Next.js pages and API routes.
-- `/src/components`: UI components including the `UploadComponent`.
-- `/src/__tests__`: Unit and Integration test suites.
-- `/e2e`: Playwright end-to-end specifications.
-- `/supabase`: Database migrations and configuration.
-- `.agent/rules.md`: Local AI instructions for consistent development.
+- `/src/app`: Next.js pages and API routes
+  - `page.tsx`: Main page with upload form and thumbnail gallery
+  - `/api/process`: POST endpoint for image processing
+  - `/api/actions`: GET endpoint for retrieving actions with images
+- `/src/components`: UI components
+  - `UploadComponent.tsx`: File upload and processing
+  - `ThumbnailGrid.tsx`: Scrollable gallery (4 columns)
+  - `ThumbnailCard.tsx`: Individual thumbnail with category label
+  - `ImageModal.tsx`: Full-screen modal with image carousel
+- `/src/types`: TypeScript type definitions
+  - `index.ts`: `Image` and `UserAction` interfaces
+- `/src/__tests__`: Unit and Integration test suites
+  - `/api`: API route tests
+  - `/components`: React component tests
+  - `/integration`: Database and storage tests
+- `/e2e`: Playwright end-to-end specifications
+  - `thumbnail-gallery.spec.ts`: Full gallery interaction tests
+- `/supabase/migrations`: Database schema migrations
+  - `20260323000000_create_user_actions.sql`: Initial user_actions table
+  - `20260325000000_add_images_table.sql`: Images storage reference table
 
 ## 🌟 Best Practices for Advancing
 
