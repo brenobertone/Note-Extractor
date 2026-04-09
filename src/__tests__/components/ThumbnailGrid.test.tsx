@@ -6,6 +6,19 @@ import ThumbnailGrid from '@/components/ThumbnailGrid';
 const mockConfirm = vi.fn();
 global.confirm = mockConfirm;
 
+// Mock the api-client
+vi.mock('@/lib/api-client', () => ({
+  apiClient: {
+    getActions: vi.fn(),
+    deleteAction: vi.fn(),
+  },
+}));
+
+import { apiClient } from '@/lib/api-client';
+
+const mockGetActions = vi.mocked(apiClient.getActions);
+const mockDeleteAction = vi.mocked(apiClient.deleteAction);
+
 describe('ThumbnailGrid', () => {
   const mockActions = [
     {
@@ -47,19 +60,15 @@ describe('ThumbnailGrid', () => {
   ];
 
   beforeEach(() => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ data: mockActions }),
-      })
-    ) as unknown as typeof fetch;
+    vi.clearAllMocks();
+    mockGetActions.mockResolvedValue(mockActions);
   });
 
-  it('should fetch data from /api/actions on mount', async () => {
+  it('should fetch data from apiClient on mount', async () => {
     render(<ThumbnailGrid onThumbnailClick={() => {}} />);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/actions?limit=20');
+      expect(mockGetActions).toHaveBeenCalledWith(20);
     });
   });
 
@@ -89,12 +98,7 @@ describe('ThumbnailGrid', () => {
   });
 
   it('should show empty state when no actions exist', async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ data: [] }),
-      })
-    ) as unknown as typeof fetch;
+    mockGetActions.mockResolvedValue([]);
 
     render(<ThumbnailGrid onThumbnailClick={() => {}} />);
 
@@ -105,7 +109,7 @@ describe('ThumbnailGrid', () => {
   });
 
   it('should handle fetch errors gracefully', async () => {
-    global.fetch = vi.fn(() => Promise.reject(new Error('Network error')));
+    mockGetActions.mockRejectedValue(new Error('Network error'));
 
     render(<ThumbnailGrid onThumbnailClick={() => {}} />);
 
@@ -126,19 +130,7 @@ describe('ThumbnailGrid', () => {
 
   it('should delete action when delete button is clicked', async () => {
     mockConfirm.mockReturnValue(true);
-
-    // Setup initial fetch
-    global.fetch = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ data: mockActions }),
-      })
-      // Mock successful delete
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ message: 'Action deleted successfully' }),
-      });
+    mockDeleteAction.mockResolvedValue(undefined);
 
     render(<ThumbnailGrid onThumbnailClick={() => {}} />);
 
@@ -151,11 +143,9 @@ describe('ThumbnailGrid', () => {
     const deleteButtons = screen.getAllByLabelText('Delete note');
     fireEvent.click(deleteButtons[0]);
 
-    // Verify delete API was called
+    // Verify delete was called via apiClient
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/actions/1', {
-        method: 'DELETE',
-      });
+      expect(mockDeleteAction).toHaveBeenCalledWith(1);
     });
 
     // Verify item was removed from UI
@@ -167,19 +157,7 @@ describe('ThumbnailGrid', () => {
 
   it('should show error message if delete fails', async () => {
     mockConfirm.mockReturnValue(true);
-
-    // Setup initial fetch
-    global.fetch = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ data: mockActions }),
-      })
-      // Mock failed delete
-      .mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: 'Delete failed' }),
-      });
+    mockDeleteAction.mockRejectedValue(new Error('Delete failed'));
 
     render(<ThumbnailGrid onThumbnailClick={() => {}} />);
 

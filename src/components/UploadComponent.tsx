@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { apiClient } from '@/lib/api-client';
 
 interface UploadComponentProps {
   onSuccess?: () => void;
@@ -9,6 +10,11 @@ interface UploadComponentProps {
 const UploadComponent = ({ onSuccess }: UploadComponentProps = {}) => {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [result, setResult] = useState<{
+    content: string;
+    category: string;
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -20,29 +26,11 @@ const UploadComponent = ({ onSuccess }: UploadComponentProps = {}) => {
     if (files.length === 0) return;
 
     setIsUploading(true);
-    const formData = new FormData();
-
-    // Append all files with 'files' key for multi-image processing
-    if (files.length > 1) {
-      files.forEach((file) => formData.append('files', file));
-    } else {
-      // Keep backward compatibility for single file
-      formData.append('file', files[0]);
-    }
 
     try {
-      const response = await fetch('/api/process', {
-        method: 'POST',
-        body: formData,
-      });
+      const data = await apiClient.processImages(files);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Upload failed');
-      }
-
-      setResult(result.data);
+      setResult(data);
       setFiles([]);
 
       // Trigger gallery refresh
@@ -56,12 +44,6 @@ const UploadComponent = ({ onSuccess }: UploadComponentProps = {}) => {
       setIsUploading(false);
     }
   };
-
-  const [result, setResult] = useState<{
-    content: string;
-    category: string;
-  } | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
