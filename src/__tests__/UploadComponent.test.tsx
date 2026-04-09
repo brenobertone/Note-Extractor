@@ -2,8 +2,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import UploadComponent from '@/components/UploadComponent';
 import { expect, vi, it, describe } from 'vitest';
 
-// Mock the global fetch
-global.fetch = vi.fn();
+// Mock the api-client
+vi.mock('@/lib/api-client', () => ({
+  apiClient: {
+    processImages: vi.fn(),
+  },
+}));
+
+import { apiClient } from '@/lib/api-client';
+
+const mockProcessImages = vi.mocked(apiClient.processImages);
 
 describe('UploadComponent', () => {
   it('renders a file input', () => {
@@ -11,14 +19,12 @@ describe('UploadComponent', () => {
     expect(screen.getByLabelText(/upload image/i)).toBeInTheDocument();
   });
 
-  it('uploads a file to /api/process', async () => {
-    vi.mocked(fetch).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        success: true,
-        data: { content: 'Success', category: 'Tasks' },
-      }),
-    } as Response);
+  it('uploads a file via apiClient.processImages', async () => {
+    mockProcessImages.mockResolvedValue({
+      id: 1,
+      content: 'Success',
+      category: 'Tasks',
+    });
 
     render(<UploadComponent />);
 
@@ -31,12 +37,7 @@ describe('UploadComponent', () => {
     fireEvent.click(uploadButton);
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/process',
-        expect.objectContaining({
-          method: 'POST',
-        })
-      );
+      expect(mockProcessImages).toHaveBeenCalledWith([file]);
     });
   });
 });
