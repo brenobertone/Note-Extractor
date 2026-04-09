@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import ThumbnailCard from './ThumbnailCard';
+import { useActions } from '@/hooks/useActions';
 import type { UserAction } from '@/types';
 
 interface ThumbnailGridProps {
@@ -13,52 +13,7 @@ export default function ThumbnailGrid({
   onThumbnailClick,
   refreshKey = 0,
 }: ThumbnailGridProps) {
-  const [actions, setActions] = useState<UserAction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchActions();
-  }, [refreshKey]);
-
-  const fetchActions = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/actions?limit=20');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch actions');
-      }
-
-      const { data } = await response.json();
-      setActions(data);
-    } catch (err) {
-      console.error('Error fetching actions:', err);
-      setError('Failed to load notes. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`/api/actions/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete action');
-      }
-
-      // Remove from local state
-      setActions((prev) => prev.filter((action) => action.id !== id));
-    } catch (err) {
-      console.error('Error deleting action:', err);
-      setError('Failed to delete note. Please try again.');
-    }
-  };
+  const { actions, loading, error, deleteAction } = useActions(refreshKey);
 
   if (loading) {
     return (
@@ -96,7 +51,7 @@ export default function ThumbnailGrid({
               key={action.id}
               action={action}
               onClick={() => onThumbnailClick(action)}
-              onDelete={handleDelete}
+              onDelete={deleteAction}
             />
           ))}
       </div>
